@@ -189,9 +189,8 @@ def cache_check(url, conn, client_req):
     
 def request_handler(conn, addr):
     client_req = conn.recv(1024)
-    #print("Printing", client_req)
     req = client_req.decode("ascii").split("\r\n")
-    url = req[0].split(" ")[1]
+    url_large = req[0].split(" ")[1]
 
     host = req[1].split(":")[1][1:]
     if len(req[1].split(":")) < 3:
@@ -202,8 +201,25 @@ def request_handler(conn, addr):
     if port < 20000 or port > 20200:
         print("Invalid port address", port)
         exit()
+    http_pos = url_large.find("://")
+    if http_pos != -1:
+        url_large = url_large[(http_pos + 3):]
 
-    if bl_check(host): # checking if domain is blacklisted
+    file_pos = url_large.find("/")
+    file_pos_end = url_large.find("?")
+    url = url_large[file_pos:file_pos_end]
+    nme_pos = url_large.find("!")
+    user_name = url_large[file_pos_end+1:nme_pos]
+    pass_name = url_large[nme_pos+1 : ]
+
+    print("PRINTING: : : : : : : : : : : : : : : : : : : : : : : : : ", url, user_name, pass_name)
+
+        #if(strcmp(user_name,"abc")==0 and pstrcmp(pass_name,"def")==0):
+    if(user_name=="abc" and pass_name=="def"):
+        print(">>> User Authenticated to use black Listed Hosts")
+
+    elif bl_check(host): # checking if domain is blacklisted
+        print(">>> User Not Authenticated to use blacklisted Hosts")
         conn.send("HTTP/1.1 403.6 Forbidden\r\nServer: proxy_server Python/2.7\r\n\r\n")
         conn.send("<html>403 Forbidden\nIP has been blacklisted by proxy server\n</html>")
         print("??? Domain referred to is blacklisted and will not be accessed")
@@ -212,8 +228,9 @@ def request_handler(conn, addr):
         print ("??? Exiting thread")
         print ("??? --------------------------------------------------\n\n")
         exit()
+    else : print(">>> User Not Authenticated to use blacklisted Hosts")
 
-    if cache_check(url, conn, client_req):
+    if cache_check(url_large, conn, client_req):
         print ("??? Closing connection to client")
         conn.close()
         print ("??? Exiting thread")
@@ -226,19 +243,18 @@ def request_handler(conn, addr):
     sock = socket.socket()
     sock.connect((host, port))
 
-    print ("??? Forwarding request on behalf of client to origin server at", url)
+    print ("??? Forwarding request on behalf of client to origin server at", url_large)
     
     if host == "localhost" or host == "127.0.0.1":
         print("??? Origin server is located locally")
 
         method = req[0].split(" ")[0]
         
-        http_pos = url.find("://")
+        http_pos = url_large.find("://")
         if http_pos != -1:
-            url = url[(http_pos + 3):]
+            url_large = url_large[(http_pos + 3):]
         
-        file_pos = url.find("/")
-        url = url[file_pos:]
+        
 
         http_ver = req[0].split(" ")[2]
 
