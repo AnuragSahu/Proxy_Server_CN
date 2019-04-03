@@ -178,8 +178,10 @@ def cache_check(url, conn, client_req):
                         conn.send(data.encode())
                     except:
                         print("File not in text format")
+                        break
             except:
                 print("File moved from cache. Redirecting to main server")
+                break
 
     if cache[orig_url][c] == 4:
         print("Recieving fresh data from origin server and forwarding to client")
@@ -193,6 +195,7 @@ def cache_check(url, conn, client_req):
                     conn.send(data)
                 except:
                     print("Waiting for client to respond")
+                    break
                 if not data:
                     break
 
@@ -307,7 +310,7 @@ def request_handler(conn, addr):
             conn.send(data)
         except:
             print("Waiting for server to respond")
-
+            break
         if not data:
             break
     print("Client request fulfilled")
