@@ -8,6 +8,8 @@ import time
 # import requests
 # import httplib
 
+admin_user_name = "abc"
+admin_password = "def"
 cache = {}
 
 def bl_parse(a):
@@ -212,10 +214,10 @@ def request_handler(conn, addr):
     user_name = url_large[file_pos_end+1:nme_pos]
     pass_name = url_large[nme_pos+1 : ]
 
-    print("PRINTING: : : : : : : : : : : : : : : : : : : : : : : : : ", url, user_name, pass_name)
+    #print("PRINTING: : : : : : : : : : : : : : : : : : : : : : : : : ", url, user_name, pass_name)
 
         #if(strcmp(user_name,"abc")==0 and pstrcmp(pass_name,"def")==0):
-    if(user_name=="abc" and pass_name=="def"):
+    if(user_name==admin_user_name and pass_name==admin_password):
         print(">>> User Authenticated to use black Listed Hosts")
 
     elif bl_check(host): # checking if domain is blacklisted
