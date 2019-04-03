@@ -1,9 +1,3 @@
-#!/usr/bin/python
-
-##########################
-# PROXY SERVER
-# Last Modified: 13th April, 2017
-##########################
 
 import os
 import re
@@ -49,7 +43,7 @@ def bl_check(host):
         with open(bl_file, 'r') as f:
             b_list = f.readlines() # read file into list
     except IOError:
-        print "??? %s not found; unable to check for blacklisting" % (bl_file,)
+        print("??? %s not found; unable to check for blacklisting" % (bl_file,))
         return False # return not blacklisted
 
     ip = socket.gethostbyname(host) # get ip of client requested url
@@ -70,7 +64,7 @@ def bl_check(host):
     return flag
 
 def cache_check(url, conn, client_req):
-    print "??? Checking if requested page has been cached"
+    print("??? Checking if requested page has been cached")
     TIMEOUT = 5 * 60
     global cache
     t = "time"
@@ -100,14 +94,14 @@ def cache_check(url, conn, client_req):
     else:
         port = int(req[1].split(":")[2])
 
-    print "??? Opening socket to end server at", host+":"+str(port)
+    print("??? Opening socket to end server at", host+":"+str(port))
     sock = socket.socket()
     sock.connect((host, port))
 
-    print "??? Forwarding request on behalf of client to origin server at", url
+    print("??? Forwarding request on behalf of client to origin server at", url)
     
     if host == "localhost" or host == "127.0.0.1":
-        print "??? Origin server is located locally"
+        print("??? Origin server is located locally")
 
         method = req[0].split(" ")[0]
         
@@ -129,11 +123,11 @@ def cache_check(url, conn, client_req):
         for l in req:
             new_req += (l + "\r\n")
 
-        print new_req
+        print(new_req)
         sock.send(new_req)
 
     else:
-        print "??? Origin server is located externally"
+        print("??? Origin server is located externally")
 
         req = client_req.split("\r\n")
         if cache[orig_url][c] > 4:
@@ -143,17 +137,17 @@ def cache_check(url, conn, client_req):
         for l in req:
             client_req += (l + "\r\n")
 
-        print client_req
+        print(client_req)
         sock.send(client_req)
         
-    print "??? Recieving response from origin server"
+    print("??? Recieving response from origin server")
     response = sock.recv(1024)
     change = False
     if "304" in response.split("\r\n"):
         change = True
-    print response
+    print(response)
 
-    print "??? Forwarding response to client"
+    print("??? Forwarding response to client")
     temp = response.split("\r\n")
     if not change:
         conn.send(response)
@@ -167,11 +161,11 @@ def cache_check(url, conn, client_req):
         conn.send(response)
 
     if cache[orig_url][c] > 4:
-        print "??? Checking if file has been modified at origin server and sending cached file if not modified"
+        print("??? Checking if file has been modified at origin server and sending cached file if not modified")
         if change == True:
             cache[orig_url][c] = 4
         else:
-            print "??? File has not been modified; sending from cache"
+            print("??? File has not been modified; sending from cache")
             with open(url_file, 'r') as f:
                 while True:
                     data = f.read(1024)
@@ -179,7 +173,7 @@ def cache_check(url, conn, client_req):
                     if not data:
                         break
     if cache[orig_url][c] == 4:
-        print "??? Recieving fresh data from origin server and forwarding to client"
+        print("??? Recieving fresh data from origin server and forwarding to client")
         cache[orig_url][t] == time.time()
         with open(url_file, 'wb') as f:
             while True:
@@ -189,13 +183,12 @@ def cache_check(url, conn, client_req):
                 if not data:
                     break
 
-    print "??? Client request fulfilled"
+    print("??? Client request fulfilled")
     return True
 
     
 def request_handler(conn, addr):
     client_req = conn.recv(1024)
-    # print client_req
 
     req = client_req.split("\r\n")
     url = req[0].split(" ")[1]
@@ -209,33 +202,30 @@ def request_handler(conn, addr):
     if bl_check(host): # checking if domain is blacklisted
         conn.send("HTTP/1.1 403.6 Forbidden\r\nServer: proxy_server Python/2.7\r\n\r\n")
         conn.send("<html>403 Forbidden\nIP has been blacklisted by proxy server\n</html>")
-        print "??? Domain referred to is blacklisted and will not be accessed"
-        print "??? Closing connection to client"
+        print("??? Domain referred to is blacklisted and will not be accessed")
+        print ("??? Closing connection to client")
         conn.close()
-        print "??? Exiting thread"
-        print "??? --------------------------------------------------\n\n"
+        print ("??? Exiting thread")
+        print ("??? --------------------------------------------------\n\n")
         exit()
 
     if cache_check(url, conn, client_req):
-        print "??? Closing connection to client"
+        print ("??? Closing connection to client")
         conn.close()
-        print "??? Exiting thread"
-        print "??? --------------------------------------------------\n\n"
+        print ("??? Exiting thread")
+        print ("??? --------------------------------------------------\n\n")
         exit()
-    print "??? Page hasn't been cached yet"
+    print("??? Page hasn't been cached yet")
 
-    # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
-    # r = requests.post(url)
-    # print r
-
-    print "??? Opening socket to end server at", host+":"+str(port)
+    
+    print("??? Opening socket to end server at", host+":"+str(port))
     sock = socket.socket()
     sock.connect((host, port))
 
-    print "??? Forwarding request on behalf of client to origin server at", url
+    print ("??? Forwarding request on behalf of client to origin server at", url)
     
     if host == "localhost" or host == "127.0.0.1":
-        print "??? Origin server is located locally"
+        print("??? Origin server is located locally")
 
         method = req[0].split(" ")[0]
         
@@ -254,69 +244,55 @@ def request_handler(conn, addr):
         for l in req:
             new_req += (l + "\r\n")
 
-#         new_req = """GET /2.data HTTP/1.1
-# Host: localhost:20101
-# User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0
-# Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-# Accept-Language: en-US,en;q=0.5
-# Accept-Encoding: gzip, deflate
-# Connection: keep-alive
-# Upgrade-Insecure-Requests: 1
 
-
-# """
-
-        print new_req
+        print(new_req)
         sock.send(new_req)
 
     else:
-        print "??? Origin server is located externally"
+        print("??? Origin server is located externally")
 
-        print client_req
+        print(client_req)
         sock.send(client_req)
         
-    print "??? Recieving response from origin server"
+    print("??? Recieving response from origin server")
     response = sock.recv(1024)
-    print response
+    print(response)
 
-    print "??? Forwarding response to client"
+    print("??? Forwarding response to client")
     conn.send(response)
 
-    print "??? Recieving data from origin server and forwarding to client"
+    print("??? Recieving data from origin server and forwarding to client")
     while True:
         data = sock.recv(1024)
         conn.send(data)
         if not data:
             break
-    print "??? Client request fulfilled"
+    print("??? Client request fulfilled")
 
     # conn.send("<html>\n\nSending this from the proxy server to" + str(addr) + "!!!\n\n</html>\r\n")
-    print "??? Closing connection to client"
+    print("??? Closing connection to client")
     conn.close()
 
-    print "??? Exiting thread"
-    print "??? --------------------------------------------------\n\n"
+    print("??? Exiting thread")
+    print("??? --------------------------------------------------\n\n")
     exit()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Usage: proxy.py <PORT_NUMBER>"
-        exit()
     
-    port = int(sys.argv[1])
+    port = 20100
     
     host = ""
     sock = socket.socket()
     sock.bind((host, port))
-    print ">>> Proxy server started; listening on port %s" % (port, )
+    print(">>> Proxy server started; listening on port %s" % (port, ))
     sock.listen(5)
 
     while (1):
         conn, addr = sock.accept()
-        print ">>> Connection accepted", addr
+        print(">>> Connection accepted", addr)
 
         global must_quit
         must_quit = threading.Event()
         threading.Timer(0, request_handler, [conn, addr]).start()
 
-        print ">>> thread_initialised"
+        print(">>> thread_initialised")
