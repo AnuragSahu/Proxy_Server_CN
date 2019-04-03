@@ -289,10 +289,14 @@ if __name__ == "__main__":
 
     while (1):
         conn, addr = sock.accept()
-        print(">>> Connection accepted", addr)
+        print("Client port", addr[1])
+        if addr[1] >= 20000 and addr[1] < 20100:
+            print(">>> Connection accepted", addr)
 
-        global must_quit
-        must_quit = threading.Event()
-        threading.Timer(0, request_handler, [conn, addr]).start()
+            global must_quit
+            must_quit = threading.Event()
+            threading.Timer(0, request_handler, [conn, addr]).start()
 
-        print(">>> thread_initialised")
+            print(">>> thread_initialised")
+        else:
+            print("Connnection from outside network. Not accepted")
