@@ -190,7 +190,10 @@ def cache_check(url, conn, client_req):
     print("Client request fulfilled")
     if cache_cnt == 3:
         print('Cache is full. Deleting first record')
-        del cache[list(cache.keys())[0]]
+        index = list(cache.keys())[0]
+        index = index.split('/')
+        index = index[0]+index[1]+".data"
+        os.remove(index)
 
     return True
 
