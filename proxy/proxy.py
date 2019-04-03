@@ -189,8 +189,8 @@ def cache_check(url, conn, client_req):
     
 def request_handler(conn, addr):
     client_req = conn.recv(1024)
-
-    req = client_req.split("\r\n")
+    #print("Printing", client_req)
+    req = client_req.decode("ascii").split("\r\n")
     url = req[0].split(" ")[1]
 
     host = req[1].split(":")[1][1:]
