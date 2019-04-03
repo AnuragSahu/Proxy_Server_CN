@@ -306,7 +306,7 @@ def request_handler(conn, addr):
         try:
             conn.send(data)
         except:
-            print("Too many connections to be handled by server")
+            print("Waiting for server to respond")
 
         if not data:
             break
