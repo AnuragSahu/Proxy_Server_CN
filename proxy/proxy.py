@@ -199,6 +199,10 @@ def request_handler(conn, addr):
     else:
         port = int(req[1].split(":")[2])
 
+    if port < 20000 or port > 20200:
+        print("Invalid port address", port)
+        exit()
+
     if bl_check(host): # checking if domain is blacklisted
         conn.send("HTTP/1.1 403.6 Forbidden\r\nServer: proxy_server Python/2.7\r\n\r\n")
         conn.send("<html>403 Forbidden\nIP has been blacklisted by proxy server\n</html>")
@@ -289,10 +293,13 @@ if __name__ == "__main__":
 
     while (1):
         conn, addr = sock.accept()
-        print(">>> Connection accepted", addr)
+        if addr[1] >= 20000 and addr[1] < 20100:
+            print("Client from inside network", addr[1])
 
-        global must_quit
-        must_quit = threading.Event()
-        threading.Timer(0, request_handler, [conn, addr]).start()
+            global must_quit
+            must_quit = threading.Event()
+            threading.Timer(0, request_handler, [conn, addr]).start()
 
-        print(">>> thread_initialised")
+            print(">>> thread_initialised")
+        else:
+            print("Connnection from outside network - ", addr[1],". Not accepted")
