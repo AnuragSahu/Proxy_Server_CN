@@ -5,11 +5,12 @@ import socket
 import sys
 import threading
 import time
+import base64
 # import requests
 # import httplib
 
 admin_user_name = "abc"
-admin_password = "def"
+admin_password = base64.standard_b64encode(bytes("def",'utf-8'))
 cache = {}; cache_cnt = 0
 
 def bl_parse(a):
@@ -221,16 +222,17 @@ def request_handler(conn, addr):
     url = url_large[file_pos:file_pos_end]
     nme_pos = url_large.find("!")
     user_name = url_large[file_pos_end+1:nme_pos]
-    pass_name = url_large[nme_pos+1 : ]
+    pass_name = base64.standard_b64encode(bytes(url_large[nme_pos+1 : ],'utf-8'))
+    print (".....................PRINT>>>>>>>>>>>>>",pass_name)
 
     #print("PRINTING: : : : : : : : : : : : : : : : : : : : : : : : : ", url, user_name, pass_name)
 
         #if(strcmp(user_name,"abc")==0 and pstrcmp(pass_name,"def")==0):
     if(user_name==admin_user_name and pass_name==admin_password):
-        print("User Authenticated to use black Listed Hosts")
+        print("----> User Authenticated to use black Listed Hosts")
 
     elif bl_check(host): # checking if domain is blacklisted
-        print("User Not Authenticated to use blacklisted Hosts")
+        print("----> User Not Authenticated to use blacklisted Hosts")
         conn.send("HTTP/1.1 403.6 Forbidden\r\nServer: proxy_server Python/2.7\r\n\r\n")
         conn.send("<html>403 Forbidden\nIP has been blacklisted by proxy server\n</html>")
         print("Domain referred to is blacklisted and will not be accessed")
@@ -239,7 +241,7 @@ def request_handler(conn, addr):
         print ("Exiting thread")
         print ("--------------------------------------------------\n\n")
         exit()
-    else : print("User Not Authenticated to use blacklisted Hosts")
+    else : print(" ----> User Not Authenticated to use blacklisted Hosts")
 
     if cache_check(url_large, conn, client_req):
         print ("??? Closing connection to client")
