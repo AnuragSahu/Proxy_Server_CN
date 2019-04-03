@@ -246,7 +246,7 @@ def request_handler(conn, addr):
 
 
         print(new_req)
-        sock.send(new_req)
+        sock.send(new_req.encode())
 
     else:
         print("??? Origin server is located externally")
