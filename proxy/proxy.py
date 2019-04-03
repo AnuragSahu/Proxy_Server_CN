@@ -67,7 +67,7 @@ def bl_check(host):
     return flag
 
 def cache_check(url, conn, client_req):
-    print("??? Checking if requested page has been cached")
+    print("Checking if requested page has been cached")
     TIMEOUT = 5 * 60
     global cache, cache_cnt
     t = "time"
@@ -170,31 +170,41 @@ def cache_check(url, conn, client_req):
             cache[orig_url][c] = 4
         else:
             print("File has not been modified; sending from cache")
-            with open(url_file, 'r') as f:
+            try:
+                f = open(url_file, 'r')
                 while True:
-                    data = f.read(1024)
-                    conn.send(data)
-                    if not data:
-                        break
+                    try:
+                        data = f.read(1024)
+                        conn.send(data.encode())
+                    except:
+                        print("File not in text format")
+            except:
+                print("File moved from cache. Redirecting to main server")
+
     if cache[orig_url][c] == 4:
         print("Recieving fresh data from origin server and forwarding to client")
         cache[orig_url][t] == time.time()
+        cache_cnt += 1
         with open(url_file, 'wb') as f:
             while True:
                 data = sock.recv(1024)
                 f.write(data)
-                conn.send(data)
-                cache_cnt += 1
+                try:
+                    conn.send(data)
+                except:
+                    print("Waiting for client to respond")
                 if not data:
                     break
 
     print("Client request fulfilled")
-    if cache_cnt == 3:
+    while cache_cnt > 3:
         print('Cache is full. Deleting first record')
         index = list(cache.keys())[0]
+        del cache[index]
         index = index.split('/')
-        index = index[0]+index[1]+".data"
+        index = index[0]+index[1]
         os.remove(index)
+        cache_cnt -= 1
 
     return True
 
@@ -223,11 +233,7 @@ def request_handler(conn, addr):
     nme_pos = url_large.find("!")
     user_name = url_large[file_pos_end+1:nme_pos]
     pass_name = base64.standard_b64encode(bytes(url_large[nme_pos+1 : ],'utf-8'))
-    print (".....................PRINT>>>>>>>>>>>>>",pass_name)
 
-    #print("PRINTING: : : : : : : : : : : : : : : : : : : : : : : : : ", url, user_name, pass_name)
-
-        #if(strcmp(user_name,"abc")==0 and pstrcmp(pass_name,"def")==0):
     if(user_name==admin_user_name and pass_name==admin_password):
         print("----> User Authenticated to use black Listed Hosts")
 
@@ -239,15 +245,15 @@ def request_handler(conn, addr):
         print ("Closing connection to client")
         conn.close()
         print ("Exiting thread")
-        print ("--------------------------------------------------\n\n")
+        print ("--------------------------------------------------\n")
         exit()
     else : print(" ----> User Not Authenticated to use blacklisted Hosts")
 
-    if cache_check(url_large, conn, client_req):
-        print ("??? Closing connection to client")
+    if cache_check(url, conn, client_req):
+        print ("Closing connection to client")
         conn.close()
-        print ("??? Exiting thread")
-        print ("??? --------------------------------------------------\n\n")
+        print ("Exiting thread")
+        print ("--------------------------------------------------\n")
         exit()
     print("Page hasn't been cached yet")
 
@@ -297,7 +303,11 @@ def request_handler(conn, addr):
     print("Recieving data from origin server and forwarding to client")
     while True:
         data = sock.recv(1024)
-        conn.send(data)
+        try:
+            conn.send(data)
+        except:
+            print("Too many connctions to be handled by server")
+
         if not data:
             break
     print("Client request fulfilled")
