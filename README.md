@@ -1,3 +1,8 @@
--Run both scripts to simulate the two ends.
--Run them multiple times to simulate many servers and clients.
--Check the scripts to see how to run them.
+# This is the Assingnment 2 of Computer Networks 
+
+We have implemented an proxy server and also provided the server and clients for the proxy.
+- it has Threads for each connection
+- Multi CLient support.
+- Authentication of user
+- Ability to black list the particular websites.
+- Password hashing.
