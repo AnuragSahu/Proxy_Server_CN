@@ -6,3 +6,5 @@ We have implemented an proxy server and also provided the server and clients for
 - Authentication of user
 - Ability to black list the particular websites.
 - Password hashing.
+
+# How to run the code?
